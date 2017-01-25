@@ -11,7 +11,8 @@ def HowToReturnPath(array2d, s, e, w, h):
     world = World(array2d, s, e, w, h)
     print world
     # path = depthFirstSearch(world)
-    path = breadthFirstSearch(world)
+    # path = breadthFirstSearch(world)
+    path = iterativeDeepeningSearch(world)
     print 'path:', path
     ans = []
     for r,c,i in path:
@@ -28,12 +29,10 @@ def HowToReturnPath(array2d, s, e, w, h):
 
 def depthFirstSearch(world):
     checked = [[False for _ in range(world.width())] for _ in range(world.height())]
-
     stack = Stack()
-    node = Node(world, world.src[0], world.src[1], list(), 0)
+    node = Node(world, world.src[0], world.src[1], list(), 0, 0)
     stack.push(node)
     while not stack.isEmpty():
-
         node = stack.pop()
         block = deepcopy(world.block(node.row, node.col))
         # print 'rotate', node.rotate*90
@@ -47,8 +46,8 @@ def depthFirstSearch(world):
         else:
 
             for i in range(4):
-                if node.row - 1 >= 0 :
-                    child = Node(world, node.row - 1, node.col, node.parents, i)
+                if node.row - 1 >= 0:
+                    child = Node(world, node.row - 1, node.col, node.parents, i, node.level+1)
                     if world.connect_up_block(node.row, node.col) and not checked[child.row][child.col]:
                         child.parents.append((node.row, node.col, node.rotate))
                         # print 'up',(child.row, child.col, i)
@@ -57,8 +56,8 @@ def depthFirstSearch(world):
 
 
             for i in range(4):
-                if node.col + 1 <3:
-                    child = Node(world, node.row, node.col + 1, node.parents, i)
+                if node.col + 1 < world.height():
+                    child = Node(world, node.row, node.col + 1, node.parents, i, node.level+1)
                     if world.connect_right_block(node.row, node.col) and not checked[child.row][child.col]:
                         child.parents.append((node.row, node.col, node.rotate))
                         # print 'right', (child.row, child.col, i)
@@ -66,8 +65,8 @@ def depthFirstSearch(world):
                     world.rotate_block(child.row, child.col, 90)
 
             for i in range(4):
-                if node.row + 1 <3:
-                    child = Node(world, node.row + 1, node.col, node.parents, i)
+                if node.row + 1 < world.height():
+                    child = Node(world, node.row + 1, node.col, node.parents, i, node.level+1)
                     if world.connect_down_block(node.row, node.col) and not checked[child.row][child.col]:
                         child.parents.append((node.row, node.col, node.rotate))
                         # print 'down', (child.row, child.col, i)
@@ -76,8 +75,7 @@ def depthFirstSearch(world):
 
             for i in range(4):
                 if node.col - 1 >= 0:
-
-                    child = Node(world, node.row, node.col - 1, node.parents, i)
+                    child = Node(world, node.row, node.col - 1, node.parents, i, node.level+1)
                     if world.connect_left_block(node.row, node.col) and not checked[child.row][child.col]:
                         child.parents.append((node.row, node.col, node.rotate))
                         # print 'left', (child.row, child.col, i)
@@ -86,18 +84,11 @@ def depthFirstSearch(world):
         world.blocks[node.row][node.col] = block
 
 
-
-    # act1 = world.rotate_block(2, 1, 180)
-    # act2 = world.rotate_block(0, 1, 270)
-    # act3 = world.rotate_block(1, 1, 90)
-    # return [act1, act2, act3]
-
-
 def breadthFirstSearch(world):
     checked = [[False for _ in range(world.width())] for _ in range(world.height())]
 
     queue = Queue()
-    node = Node(world, world.src[0], world.src[1], list(), 0)
+    node = Node(world, world.src[0], world.src[1], list(), 0, 0)
     queue.push(node)
     while not queue.isEmpty():
 
@@ -115,7 +106,7 @@ def breadthFirstSearch(world):
 
             for i in range(4):
                 if node.row - 1 >= 0:
-                    child = Node(world, node.row - 1, node.col, node.parents, i)
+                    child = Node(world, node.row - 1, node.col, node.parents, i, node.level+1)
                     if world.connect_up_block(node.row, node.col) and not checked[child.row][child.col]:
                         child.parents.append((node.row, node.col, node.rotate))
                         # print 'up',(child.row, child.col, i)
@@ -124,7 +115,7 @@ def breadthFirstSearch(world):
 
             for i in range(4):
                 if node.col + 1 < 3:
-                    child = Node(world, node.row, node.col + 1, node.parents, i)
+                    child = Node(world, node.row, node.col + 1, node.parents, i, node.level+1)
                     if world.connect_right_block(node.row, node.col) and not checked[child.row][child.col]:
                         child.parents.append((node.row, node.col, node.rotate))
                         # print 'right', (child.row, child.col, i)
@@ -133,7 +124,7 @@ def breadthFirstSearch(world):
 
             for i in range(4):
                 if node.row + 1 < 3:
-                    child = Node(world, node.row + 1, node.col, node.parents, i)
+                    child = Node(world, node.row + 1, node.col, node.parents, i, node.level+1)
                     if world.connect_down_block(node.row, node.col) and not checked[child.row][child.col]:
                         child.parents.append((node.row, node.col, node.rotate))
                         # print 'down', (child.row, child.col, i)
@@ -143,7 +134,7 @@ def breadthFirstSearch(world):
             for i in range(4):
                 if node.col - 1 >= 0:
 
-                    child = Node(world, node.row, node.col - 1, node.parents, i)
+                    child = Node(world, node.row, node.col - 1, node.parents, i, node.level+1)
                     if world.connect_left_block(node.row, node.col) and not checked[child.row][child.col]:
                         child.parents.append((node.row, node.col, node.rotate))
                         # print 'left', (child.row, child.col, i)
@@ -153,8 +144,73 @@ def breadthFirstSearch(world):
     return []
 
 
-def iterativeDeepeningSearch(world):
+def IDS(world, limit):
+    if limit <= 0:
+        return []
+    else:
+        checked = [[False for _ in range(world.width())] for _ in range(world.height())]
+        stack = Stack()
+        node = Node(world, world.src[0], world.src[1], list(), 0, 0)
+        stack.push(node)
+        while not stack.isEmpty():
+            node = stack.pop()
+            block = deepcopy(world.block(node.row, node.col))
+            # print 'rotate', node.rotate*90
+            world.rotate_block(node.row, node.col, node.rotate * 90)
+            # print world
+            # print node.row, node.col
+            checked[node.row][node.col] = True
+            if (node.row, node.col) == world.dst:
+                node.parents.pop(0)
+                return node.parents
+            else:
+                if node.level+1 <= limit:
+                    # print node.level+1
+                    for i in range(4):
+                        if node.row - 1 >= 0:
+                            child = Node(world, node.row - 1, node.col, node.parents, i, node.level+1)
+                            if world.connect_up_block(node.row, node.col) and not checked[child.row][child.col]:
+                                child.parents.append((node.row, node.col, node.rotate))
+                                # print 'up',(child.row, child.col, i)
+                                stack.push(child)
+                            world.rotate_block(child.row, child.col, 90)
 
+                    for i in range(4):
+                        if node.col + 1 < world.height():
+                            child = Node(world, node.row, node.col + 1, node.parents, i, node.level+1)
+                            if world.connect_right_block(node.row, node.col) and not checked[child.row][child.col]:
+                                child.parents.append((node.row, node.col, node.rotate))
+                                # print 'right', (child.row, child.col, i)
+                                stack.push(child)
+                            world.rotate_block(child.row, child.col, 90)
+
+                    for i in range(4):
+                        if node.row + 1 < world.height():
+                            child = Node(world, node.row + 1, node.col, node.parents, i, node.level+1)
+                            if world.connect_down_block(node.row, node.col) and not checked[child.row][child.col]:
+                                child.parents.append((node.row, node.col, node.rotate))
+                                # print 'down', (child.row, child.col, i)
+                                stack.push(child)
+                            world.rotate_block(child.row, child.col, 90)
+
+                    for i in range(4):
+                        if node.col - 1 >= 0:
+
+                            child = Node(world, node.row, node.col - 1, node.parents, i, node.level+1)
+                            if world.connect_left_block(node.row, node.col) and not checked[child.row][child.col]:
+                                child.parents.append((node.row, node.col, node.rotate))
+                                # print 'left', (child.row, child.col, i)
+                                stack.push(child)
+                            world.rotate_block(child.row, child.col, 90)
+            world.blocks[node.row][node.col] = block
+        return[]
+
+
+def iterativeDeepeningSearch(world):
+    for i in range(1,5):
+        p = IDS(world, i)
+        if len(p):
+           return p
     return []
 
 

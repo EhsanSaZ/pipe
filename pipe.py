@@ -49,7 +49,7 @@ class Case(Rect):
 
 
 score = 0
-x = 3  # Number of blocks in x
+x = 3 # Number of blocks in x
 y = 3  # Number of blocks in y
 # Each block is 61*61
 SCREEN = display.set_mode((61 * x, 61 * y))
