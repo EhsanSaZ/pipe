@@ -11,3 +11,4 @@ class Node:
         self.f = 0
         self.g = 0
         self.h = 0
+        self.priority = 0

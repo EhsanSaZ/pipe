@@ -49,8 +49,8 @@ class Case(Rect):
 
 
 score = 0
-x = 3 # Number of blocks in x
-y = 3  # Number of blocks in y
+x = 5  # Number of blocks in x
+y = 5  # Number of blocks in y
 # Each block is 61*61
 SCREEN = display.set_mode((61 * x, 61 * y))
 SRECT = SCREEN.get_rect()
