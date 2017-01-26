@@ -1,6 +1,7 @@
 from world import World
 from util import Stack
 from util import Queue
+from util import PriorityQueue
 from node import Node
 from copy import deepcopy
 
@@ -12,7 +13,9 @@ def HowToReturnPath(array2d, s, e, w, h):
     print world
     # path = depthFirstSearch(world)
     # path = breadthFirstSearch(world)
-    path = iterativeDeepeningSearch(world)
+    # path = iterativeDeepeningSearch(world)
+    path = uniformCostSearch(world)
+    # path = aStarSearch(world)
     print 'path:', path
     ans = []
     for r,c,i in path:
@@ -86,7 +89,6 @@ def depthFirstSearch(world):
 
 def breadthFirstSearch(world):
     checked = [[False for _ in range(world.width())] for _ in range(world.height())]
-
     queue = Queue()
     node = Node(world, world.src[0], world.src[1], list(), 0, 0)
     queue.push(node)
@@ -215,17 +217,149 @@ def iterativeDeepeningSearch(world):
 
 
 def uniformCostSearch(world):
+    checked = [[False for _ in range(world.width())] for _ in range(world.height())]
+    Pqueue = PriorityQueue()
+    node = Node(world, world.src[0], world.src[1], list(), 0, 0)
+    Pqueue.push(node, 0)
+    while not Pqueue.isEmpty():
+        node = Pqueue.pop()
+        block = deepcopy(world.block(node.row, node.col))
+        # print 'rotate', node.rotate*90
+        world.rotate_block(node.row, node.col, node.rotate * 90)
+        # print world
+        # print node.row, node.col
+        checked[node.row][node.col] = True
+        if (node.row, node.col) == world.dst:
+            node.parents.pop(0)
+            return node.parents
+        else:
 
+            for i in range(4):
+                if node.row - 1 >= 0:
+                    child = Node(world, node.row - 1, node.col, node.parents, i, node.level + 1)
+                    if world.connect_up_block(node.row, node.col) and not checked[child.row][child.col]:
+                        child.parents.append((node.row, node.col, node.rotate))
+                        # print 'up',(child.row, child.col, i)
+                        Pqueue.push(child, child.level+i)
+                    world.rotate_block(child.row, child.col, 90)
+
+            for i in range(4):
+                if node.col + 1 < 3:
+                    child = Node(world, node.row, node.col + 1, node.parents, i, node.level + 1)
+                    if world.connect_right_block(node.row, node.col) and not checked[child.row][child.col]:
+                        child.parents.append((node.row, node.col, node.rotate))
+                        # print 'right', (child.row, child.col, i)
+                        Pqueue.push(child, child.level+i)
+                    world.rotate_block(child.row, child.col, 90)
+
+            for i in range(4):
+                if node.row + 1 < 3:
+                    child = Node(world, node.row + 1, node.col, node.parents, i, node.level + 1)
+                    if world.connect_down_block(node.row, node.col) and not checked[child.row][child.col]:
+                        child.parents.append((node.row, node.col, node.rotate))
+                        # print 'down', (child.row, child.col, i)
+                        Pqueue.push(child, child.level+i)
+                    world.rotate_block(child.row, child.col, 90)
+
+            for i in range(4):
+                if node.col - 1 >= 0:
+
+                    child = Node(world, node.row, node.col - 1, node.parents, i, node.level + 1)
+                    if world.connect_left_block(node.row, node.col) and not checked[child.row][child.col]:
+                        child.parents.append((node.row, node.col, node.rotate))
+                        # print 'left', (child.row, child.col, i)
+                        Pqueue.push(child, child.level+i)
+                    world.rotate_block(child.row, child.col, 90)
+        world.blocks[node.row][node.col] = block
     return []
 
 
-def manhattanHeuristicFunction(world):
-    return 0
+def manhattanHeuristicFunction(world, current_node):
+
+    return (current_node.row - world.dst[0])+(current_node.col - world.dst[1])
 
 
-def heuristicFunction(world):
-    return 0
+def heuristicFunction(world, current_node):
+
+    return current_node.col - world.dst[1]
 
 
-def aStarSearch(world):
-    return []
+# def aStarSearch(world):
+#     Pqueue1 = PriorityQueue()
+#     # Pqueue2 = PriorityQueue()
+#     closedlist= list
+#     node = Node(world, world.src[0], world.src[1], list(), 0, 0)
+#     Pqueue1.push(node, 0)
+#     while not Pqueue1.isEmpty():
+#         node = Pqueue1.pop()
+#         block = deepcopy(world.block(node.row, node.col))
+#         world.rotate_block(node.row, node.col, node.rotate * 90)
+#         for i in range(4):
+#             if node.row - 1 >= 0:
+#                 child = Node(world, node.row - 1, node.col, node.parents, i, node.level + 1)
+#                 if world.connect_up_block(node.row, node.col):
+#                     child.parents.append((node.row, node.col, node.rotate))
+#                     # print 'up',(child.row, child.col, i)
+#                     # queue.push(child)
+#                     if (child.row, child.col) == world.dst:
+#                         child.parents.pop(0)
+#                         child.g = node.g + i
+#                         child.h = manhattanHeuristicFunction(world, child)
+#                         child.f = child.g + child.h
+#                         return child.parents
+#                     if():
+#
+#                     if():
+#                 world.rotate_block(child.row, child.col, 90)
+#
+#         for i in range(4):
+#             if node.col + 1 < 3:
+#                 child = Node(world, node.row, node.col + 1, node.parents, i, node.level + 1)
+#                 if world.connect_right_block(node.row, node.col) and not checked[child.row][child.col]:
+#                     child.parents.append((node.row, node.col, node.rotate))
+#                     if (child.row, child.col) == world.dst:
+#                         child.parents.pop(0)
+#                         child.g = node.g + i
+#                         child.h = manhattanHeuristicFunction(world, child)
+#                         child.f = child.g + child.h
+#                         return child.parents
+#                     if ():
+#
+#                     if ():
+#                 world.rotate_block(child.row, child.col, 90)
+#
+#         for i in range(4):
+#             if node.row + 1 < 3:
+#                 child = Node(world, node.row + 1, node.col, node.parents, i, node.level + 1)
+#                 if world.connect_down_block(node.row, node.col) and not checked[child.row][child.col]:
+#                     child.parents.append((node.row, node.col, node.rotate))
+#                     if (child.row, child.col) == world.dst:
+#                         child.parents.pop(0)
+#                         child.g = node.g + i
+#                         child.h = manhattanHeuristicFunction(world, child)
+#                         child.f = child.g + child.h
+#                         return child.parents
+#                     if ():
+#
+#                     if ():
+#                 world.rotate_block(child.row, child.col, 90)
+#
+#         for i in range(4):
+#             if node.col - 1 >= 0:
+#                 child = Node(world, node.row, node.col - 1, node.parents, i, node.level + 1)
+#                 if world.connect_left_block(node.row, node.col) and not checked[child.row][child.col]:
+#                     child.parents.append((node.row, node.col, node.rotate))
+#                     if (child.row, child.col) == world.dst:
+#                         child.parents.pop(0)
+#                         child.g = node.g + i
+#                         child.h = manhattanHeuristicFunction(world, child)
+#                         child.f = child.g + child.h
+#                         return child.parents
+#                     if ():
+#
+#                     if ():
+#                 world.rotate_block(child.row, child.col, 90)
+#         closedlist.append(node)
+#         world.blocks[node.row][node.col] = block
+#     return []
+#
